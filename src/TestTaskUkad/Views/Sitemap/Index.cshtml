@@ -1,0 +1,17 @@
+﻿@{
+    ViewBag.Title = "Pets";
+}
+
+<h1>Sitemap Generator</h1>
+<hr/>
+<div>
+    <form action="Sitemap/Generate" method="post">
+        <div class="form-group">
+            Enter URL of site:
+            <input name="siteUrl" id="siteUrl" type="text" placeholder="http://example.com/" class="form-control"/>
+        </div>
+        <div class="form-group">
+            <input id="getSitemap" class="btn btn-primary" type="submit" value="Genarate Sitemap" />
+        </div>
+    </form>
+</div>
