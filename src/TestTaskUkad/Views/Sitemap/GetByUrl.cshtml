@@ -2,6 +2,9 @@
 @{ 
     ViewBag.Title = "Sitemap";
     var sitemap = Model;
+    var hasDiagnostic = sitemap.Map.Any(m => m.RequestsTimeLog.Count() != 0);
+    var hasManyRequests = sitemap.Map.All(m => m.RequestsTimeLog.Count() > 1);
+    var hasPriority = sitemap.Map.Any(m => m.Priority != null);
 }
 
 <h1>Sitemap of <a href="@sitemap.Url.AbsoluteUri">@sitemap.Url.Host</a></h1>
@@ -11,15 +14,32 @@
 <a asp-action="Download" asp-route-siteUrl="@(sitemap.Url.AbsoluteUri)" download="sitemap.xml">
     Sitemap.xml
 </a> |
-<input id="btn-diagnostic" type="button" value="Get diagnostic" />
-
-<input id="siteUrl" type="hidden" value="@(sitemap.Url.AbsoluteUri)" />
+<form asp-action="RequestDiagnostic" method="post">
+    <input name="siteUrl" id="siteUrl" value="@(sitemap.Url.AbsoluteUri)" type="hidden" />
+    <input id="btn-diagnostic" type="submit" value="Diagnostic" class="btn btn-primary"/>
+</form>
 
 <table class="table table-bordered">
     <thead>
         <tr>
             <th>№</th>
             <th>Page</th>
+            @if (hasPriority)
+            {
+                <td>Priority</td>
+            }
+            @if (hasDiagnostic)
+            {
+                if (hasManyRequests)
+                {
+                    <td>MinReqTime</td>
+                    <td>MaxReqTime</td>
+                }
+                else
+                {
+                    <td>ReqTime</td>
+                }
+            }
         </tr>
     </thead>
     <tbody>
@@ -30,39 +50,21 @@
                 <tr>
                     <td>@i</td>
                     <td>@s.Url.AbsoluteUri</td>
-                    <td>@s.Priority</td>
+                    @if (hasPriority)
+                    {
+                        <td>@s.Priority</td>
+                    }
+                    @if (hasDiagnostic)
+                    {
+                        if (hasManyRequests)
+                        {
+                            <td>@s.RequestsTimeLog.Min()</td>
+                        }
+                        <td>@s.RequestsTimeLog.Max()</td>
+                    }
                 </tr>
                 i++;
             }
         }
     </tbody>
 </table>
-
-<script>
-    var reqTime = [];
-
-    function SitemapDiagnostic(sitemap)
-    {
-        for (var i = 0; i < sitemap.map.length; i++) {
-            var siteUrl = sitemap.map[i].url;
-            var ajaxTime = new Date().getTime();
-            $.ajax({
-                type: "GET",
-                url: siteUrl,
-                timeout: 10000
-            })
-            .success(function () { reqTime[siteUrl] = new Date().getTime() - ajaxTime; })
-            .error(function () { alert("error"); });
-        }
-
-    }
-
-    $(document).ready(function () {
-        $("#btn-diagnostic").click(function () {
-            var url = $("#siteUrl").val();
-            $.getJSON("/Sitemap/GetJsonByUrl", { siteUrl: url })
-                .success(function (data) { SitemapDiagnostic(data); })
-                .error(function () { alert("Ошибка выполнения"); });      
-        });
-    });
-</script>

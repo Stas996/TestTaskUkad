@@ -65,8 +65,8 @@ namespace TestTaskUkad.Controllers
         }
 
         // POST: /<controller>/GetRequestDiagnostic/<siteUrl>
-        [HttpGet]
-        public async Task<IActionResult> GetRequestDiagnostic(string siteUrl)
+        [HttpPost]
+        public async Task<IActionResult> RequestDiagnostic(string siteUrl)
         {
             var url = new Uri(siteUrl);
             var doc = _sitemaps.Documents.FirstOrDefault(d => d.Data.Url.AbsoluteUri == url.AbsoluteUri);
@@ -75,6 +75,7 @@ namespace TestTaskUkad.Controllers
 
             var sitemap = doc.Data;
             await sitemap.MapRequest();
+            await doc.SyncUpdate(sitemap);
 
             return View("GetByUrl", sitemap);
         }

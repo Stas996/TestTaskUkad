@@ -59,7 +59,7 @@ namespace TestTaskUkad.Models
             else
             {
                 Map = Crawler.GetUrlsFromHtml(Url)
-                     .Where(u => u.AbsoluteUri.Contains(Url.Host)
+                     .Where(u => u.AbsoluteUri.Contains(Url.Host) && u.Segments.Count() < 3
                      && !u.AbsoluteUri.ContainsAny(".jpg", ".png", "mailto:"))
                      .Select(u => new SiteMapLocation() { StringUrl = u.AbsoluteUri }).ToArray();
             }
