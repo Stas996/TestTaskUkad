@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Xml.Serialization;
@@ -37,12 +38,12 @@ namespace TestTaskUkad.Models
             
         }
 
-        public async Task Generate(string url)
+        public async Task GenerateAsync(string url)
         {
-            await Generate(new Uri(url));
+            await GenerateAsync(new Uri(url));
         }
 
-        public async Task Generate(Uri url)
+        public async Task GenerateAsync(Uri url)
         {
             Url = url;
             HttpClient client = new HttpClient();
@@ -58,30 +59,37 @@ namespace TestTaskUkad.Models
             else
             {
                 Map = Crawler.GetUrlsFromHtml(Url)
-                     .Where(u => u.AbsoluteUri.Contains(Url.Host) && u.Segments.Count() < 3
-                     && !u.AbsoluteUri.ContainsAny(".jpg", ".png", "mailto:", "/page/", "/pages/"))
+                     .Where(u => u.AbsoluteUri.Contains(Url.Host)
+                     && !u.AbsoluteUri.ContainsAny(".jpg", ".png", "mailto:"))
                      .Select(u => new SiteMapLocation() { StringUrl = u.AbsoluteUri }).ToArray();
+            }
+        }
+
+        public async Task GenerateXmlAsync(string path)
+        {
+
+            Mocoding.EasyDocDb.Xml.XmlSerializer ser = new Mocoding.EasyDocDb.Xml.XmlSerializer();
+            using (var sw = new StreamWriter(path))
+            {
+                await sw.WriteLineAsync(ser.Serialize(this));
             }
         }
 
         public async Task MapRequest()
         {
+            if (Map == null)
+                return;
             var tasks = new List<Task<int>>();
+            var map = Map.Count() > 300 ? Map.Take(300) : Map;
 
-            //foreach (var u in Map)
-               // tasks.Add(GetHttpWithTimingInfo(u.AbsoluteUri));
+            foreach (var u in Map)
+                tasks.Add(u.GetRequestTimeAsync());
 
-            await Task.WhenAll(tasks.ToArray());
+            await Task.WhenAll(tasks);
+
+            for (int i = 0; i < tasks.Count; i++)
+                Map[i].RequestsTimeLog.Add(tasks[i].Result);
         }
 
-        private async Task<int> GetHttpWithTimingInfo(string url)
-        {
-            var stopWatch = Stopwatch.StartNew();
-            using (var client = new HttpClient())
-            {
-                var result = await client.GetAsync(url);
-                return stopWatch.Elapsed.Milliseconds;
-            }
-        }
     }
 }

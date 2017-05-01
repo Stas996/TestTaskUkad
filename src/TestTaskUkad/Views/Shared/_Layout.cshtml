@@ -8,8 +8,7 @@
     <environment names="Development">
         <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.css" />
         <link rel="stylesheet" href="~/css/site.css" />
-        <script src="~/js/angular.js"></script>
-        <script src="~/js/angular-route.js"></script>
+        <script src="~/lib/jquery/dist/jquery.js"></script>
     </environment>
     <environment names="Staging,Production">
         <link rel="stylesheet" href="https://ajax.aspnetcdn.com/ajax/bootstrap/3.3.6/css/bootstrap.min.css"
@@ -43,13 +42,13 @@
     <div class="container body-content">
         @RenderBody()
         <hr />
-        <footer>
+        <footer class="col-md-12">
             <p>&copy; 2017 - TestTaskUkad</p>
         </footer>
     </div>
 
     <environment names="Development">
-        <script src="~/lib/jquery/dist/jquery.js"></script>
+        
         <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
         <script src="~/js/site.js" asp-append-version="true"></script>
     </environment>

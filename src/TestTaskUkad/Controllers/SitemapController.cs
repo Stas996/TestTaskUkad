@@ -1,7 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Mocoding.EasyDocDb;
 using TestTaskUkad.Models;
@@ -12,21 +14,38 @@ namespace TestTaskUkad.Controllers
 {
     public class SitemapController : Controller
     {
+        readonly IHostingEnvironment _hostingEnvironment;
         readonly IDocumentCollection<SiteMap> _sitemaps;
 
-        public SitemapController(IDocumentCollection<SiteMap> sitemaps)
+        public SitemapController(IHostingEnvironment hostingEnvironment, IDocumentCollection<SiteMap> sitemaps)
         {
+            _hostingEnvironment = hostingEnvironment;
             _sitemaps = sitemaps;
         }
 
         // GET: /<controller>/
         [HttpGet]
         public IActionResult Index()
-        {      
+        {
+            var docs = _sitemaps.Documents;
+            ViewBag.Sitemaps = docs.Count() != 0 ? docs.Select(d => d.Data.Url).ToArray() : null;
             return View();
         }
 
-        // POST: /<controller>/
+        // GET: /<controller>/GetByUrl/<siteUrl>
+        [HttpGet]
+        public IActionResult GetByUrl(string siteUrl)
+        {
+            var url = new Uri(siteUrl);
+            var doc = _sitemaps.Documents.FirstOrDefault(d => d.Data.Url.AbsoluteUri == url.AbsoluteUri);
+            if (doc == null)
+                return NotFound();
+
+            var sitemap = doc.Data;
+            return View(sitemap);
+        }
+
+        // POST: /<controller>/Generate/<siteUrl>
         [HttpPost]
         public async Task<IActionResult> Generate(string siteUrl)
         {
@@ -36,77 +55,56 @@ namespace TestTaskUkad.Controllers
             if (doc == null)
             {
                 doc = _sitemaps.New();
-                await sitemap.Generate(url);
+                await sitemap.GenerateAsync(url);
                 await doc.SyncUpdate(sitemap);
             }
             else
                 sitemap = doc.Data;
             
-            return View(sitemap);
+            return View("GetByUrl", sitemap);
         }
 
-
-        // GET: /<controller>/<url>
-        //[HttpGet]
-        //[Route("api/[controller]/Dowmload")]
-        [Produces("application/xml")]
-        public SiteMap Download(string siteUrl)
+        // POST: /<controller>/GetRequestDiagnostic/<siteUrl>
+        [HttpGet]
+        public async Task<IActionResult> GetRequestDiagnostic(string siteUrl)
         {
             var url = new Uri(siteUrl);
             var doc = _sitemaps.Documents.FirstOrDefault(d => d.Data.Url.AbsoluteUri == url.AbsoluteUri);
             if (doc == null)
-                return null;
+                return NotFound();
 
-            return doc.Data;
+            var sitemap = doc.Data;
+            await sitemap.MapRequest();
+
+            return View("GetByUrl", sitemap);
         }
 
-        // GET: api/<controller>
+        // GET: /<controller>/Download/<siteUrl>
         [HttpGet]
-        [Route("api/[controller]")]
-        [Produces("application/json")]
-        public IEnumerable<SiteMap> Get()
+        public async Task<IActionResult> Download(string siteUrl)
         {
-            return _sitemaps.Documents.Select(d => d.Data);
+            var url = new Uri(siteUrl);
+            var doc = _sitemaps.Documents.FirstOrDefault(d => d.Data.Url.AbsoluteUri == url.AbsoluteUri);
+            if (doc == null)
+                return NotFound();
+
+            string fpath = Path.Combine(_hostingEnvironment.WebRootPath, "files", "sitemap.xml");
+            await doc.Data.GenerateXmlAsync(fpath);
+
+            return File("~/files/sitemap.xml", "application/xml");
         }
 
-        // GET: api/<controller>/5
+        // GET: /<controller>/GetByUrl/<siteUrl>
         [HttpGet]
-        [Route("api/[controller]/{url?}")]
-        [Produces("application/json")]
-        public SiteMap Get(string url)
+        public IActionResult GetJsonByUrl(string siteUrl)
         {
-            var sm = _sitemaps.Documents.FirstOrDefault(d => d.Data.Url.AbsoluteUri == url);
-            return sm != null ? sm.Data : null;
-        }
+            var url = new Uri(siteUrl);
+            var doc = _sitemaps.Documents.FirstOrDefault(d => d.Data.Url.AbsoluteUri == url.AbsoluteUri);
+            if (doc == null)
+                return NotFound();
 
-        // POST: api/<controller>
-        //[HttpPost]
-        //[Route("api/[controller]/")]
-        //[Produces("application/json")]
-        //public async Task Generate([FromBody] string url)
-        //{
-        //    //url = "http://kinogo.club/";
-        //    //var doc = _sitemaps.Documents.FirstOrDefault(d => d.Data.Url.AbsoluteUri == url);
-        //    //if (doc != null)
-        //    //    return;
-        //    //doc = _sitemaps.New();
-        //    //var sm = new SiteMap(url);
-            
-        //    //await doc.SyncUpdate(sm);
-        //}
-
-        // POST: api/<controller>
-        [HttpPut]
-        [Route("api/[controller]/{url?}")]
-        [Produces("application/json")]
-        public async Task Post([FromBody] SiteMap sitemap)
-        {
-            //var doc = _sitemaps.Documents.FirstOrDefault(d => d.Data.Url == url);
-            //if (doc == null)
-            //    doc = _sitemaps.New();          
-            //var sm = doc.Data.Url != null ? doc.Data : new SiteMap(url);             
-            //await sm.MapRequest();
-            //await doc.SyncUpdate(sm);      
+            var sitemap = doc.Data;
+            return Json(sitemap);
         }
 
     }

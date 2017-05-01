@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
+using System.Net.Http;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using System.Xml.Serialization;
 
 namespace TestTaskUkad.Models
@@ -24,7 +25,7 @@ namespace TestTaskUkad.Models
 
         public SiteMapLocation()
         {
-
+            RequestsTimeLog = new List<int>();
         }
 
         [XmlElement("loc")]
@@ -47,11 +48,6 @@ namespace TestTaskUkad.Models
                     return null;
                 return (_url == null) ? new Uri(_stringUrl) : _url;
             }
-            //set
-            //{
-            //    _url = value;
-            //    _stringUrl = _url.AbsoluteUri;
-            //}
         }
 
         [XmlElement("changefreq")]
@@ -65,5 +61,19 @@ namespace TestTaskUkad.Models
         [XmlElement("priority")]
         public double? Priority { get; set; }
         public bool ShouldSerializePriority() { return Priority.HasValue; }
+
+        [XmlIgnore]
+        public ICollection<int> RequestsTimeLog { get; set; }
+
+
+        public async Task<int> GetRequestTimeAsync()
+        {
+            var stopWatch = Stopwatch.StartNew();
+            using (var client = new HttpClient())
+            {
+                var result = await client.GetAsync(Url);
+                return stopWatch.Elapsed.Milliseconds;
+            }
+        }
     }
 }

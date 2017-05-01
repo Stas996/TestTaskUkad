@@ -1,0 +1,68 @@
+﻿@model TestTaskUkad.Models.SiteMap
+@{ 
+    ViewBag.Title = "Sitemap";
+    var sitemap = Model;
+}
+
+<h1>Sitemap of <a href="@sitemap.Url.AbsoluteUri">@sitemap.Url.Host</a></h1>
+<hr />
+
+<a asp-action="Index">Back</a> | 
+<a asp-action="Download" asp-route-siteUrl="@(sitemap.Url.AbsoluteUri)" download="sitemap.xml">
+    Sitemap.xml
+</a> |
+<input id="btn-diagnostic" type="button" value="Get diagnostic" />
+
+<input id="siteUrl" type="hidden" value="@(sitemap.Url.AbsoluteUri)" />
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>№</th>
+            <th>Page</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{ 
+            int i = 1;
+            foreach (var s in sitemap.Map)
+            {
+                <tr>
+                    <td>@i</td>
+                    <td>@s.Url.AbsoluteUri</td>
+                    <td>@s.Priority</td>
+                </tr>
+                i++;
+            }
+        }
+    </tbody>
+</table>
+
+<script>
+    var reqTime = [];
+
+    function SitemapDiagnostic(sitemap)
+    {
+        for (var i = 0; i < sitemap.map.length; i++) {
+            var siteUrl = sitemap.map[i].url;
+            var ajaxTime = new Date().getTime();
+            $.ajax({
+                type: "GET",
+                url: siteUrl,
+                timeout: 10000
+            })
+            .success(function () { reqTime[siteUrl] = new Date().getTime() - ajaxTime; })
+            .error(function () { alert("error"); });
+        }
+
+    }
+
+    $(document).ready(function () {
+        $("#btn-diagnostic").click(function () {
+            var url = $("#siteUrl").val();
+            $.getJSON("/Sitemap/GetJsonByUrl", { siteUrl: url })
+                .success(function (data) { SitemapDiagnostic(data); })
+                .error(function () { alert("Ошибка выполнения"); });      
+        });
+    });
+</script>

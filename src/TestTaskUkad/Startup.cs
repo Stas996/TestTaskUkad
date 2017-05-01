@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Mocoding.EasyDocDb;
 using Mocoding.EasyDocDb.FileSystem;
-using Mocoding.EasyDocDb.Xml;
+using Mocoding.EasyDocDb.Json;
 using TestTaskUkad.Models;
 
 namespace TestTaskUkad
@@ -37,7 +37,7 @@ namespace TestTaskUkad
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var repository = new EmbeddedRepository(new XmlSerializer());
+            var repository = new EmbeddedRepository(new JsonSerializer());
             var sitemaps = repository.InitCollection<SiteMap>("../data/sitemaps");
             sitemaps.Wait();
 

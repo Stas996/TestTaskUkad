@@ -1,10 +1,11 @@
 ﻿@{
-    ViewBag.Title = "Pets";
+    ViewBag.Title = "Sitemap Generator";
+    var sitemaps = (ViewBag.Sitemaps as IEnumerable<Uri>);
 }
 
 <h1>Sitemap Generator</h1>
 <hr/>
-<div>
+<div class="col-md-9">
     <form action="Sitemap/Generate" method="post">
         <div class="form-group">
             Enter URL of site:
@@ -15,3 +16,16 @@
         </div>
     </form>
 </div>
+
+@if (sitemaps != null) {
+    <aside class="col-md-3 sidebar">
+        <ul class="list-group">
+            @foreach (var s in sitemaps)
+            {
+                <li class="list-group-item">
+                    <a asp-action="GetByUrl" asp-route-siteUrl="@(s.AbsoluteUri)">@s.Host</a>
+                </li>
+            }
+        </ul>
+    </aside>
+}
