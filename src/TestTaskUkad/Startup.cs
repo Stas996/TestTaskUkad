@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Mocoding.EasyDocDb;
 using Mocoding.EasyDocDb.FileSystem;
 using Mocoding.EasyDocDb.Json;
-using TestTaskUkad.Models;
+using SiteMapGen;
 
 namespace TestTaskUkad
 {
@@ -42,7 +37,7 @@ namespace TestTaskUkad
             sitemaps.Wait();
 
             services.AddSingleton(sitemaps.Result);
-
+            services.AddSession();
             // Add framework services.
             services.AddApplicationInsightsTelemetry(Configuration);
 
@@ -71,6 +66,7 @@ namespace TestTaskUkad
 
             app.UseStaticFiles();
 
+            app.UseSession();
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

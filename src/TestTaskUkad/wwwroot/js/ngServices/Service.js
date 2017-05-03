@@ -1,35 +1,31 @@
 ﻿app.service("SiteMapService", function ($http) {
 
-    this.URL = "api/Sitemap/";
+    this.URL = "/api/Sitemap/";
 
-    this.getAll = function () {
-        return $http.get(this.URL);
-    }
-
-    this.get = function (id) {
+    this.get = function (siteUrl) {
         return $http(
         {
             method: 'get',
-            data: id,
-            url: this.URL + "?url=" + id,
+            data: siteUrl,
+            url: this.URL + "?siteUrl=" + siteUrl
         });
     }
 
-    this.post = function (id) {
+    this.getTime = function (siteUrl) {
         return $http(
         {
-            method: 'post',
-            data: id,
-            url: this.URL + "?url=" + id
+            method: 'get',
+            data: siteUrl,
+            url: this.URL + "Time/" + "?siteUrl=" + siteUrl
         });
     }
 
-    this.delete = function (id) {
+    this.update = function (siteUrl, data) {
         return $http(
         {
-            method: 'delete',
-            data: id,
-            url: this.URL + "?url=" + id
+            method: 'put',
+            data: data,
+            url: this.URL + "?siteUrl=" + siteUrl
         });
     }
 

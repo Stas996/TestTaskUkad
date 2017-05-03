@@ -3,6 +3,13 @@
     var sitemaps = (ViewBag.Sitemaps as IEnumerable<Uri>);
 }
 
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">
+        <strong>Error!</strong> @(TempData["ErrorMessage"] as string).
+    </div>
+}
+
 <h1>Sitemap Generator</h1>
 <hr/>
 <div class="col-md-9">
@@ -19,6 +26,7 @@
 
 @if (sitemaps != null) {
     <aside class="col-md-3 sidebar">
+        Latest sitemaps:
         <ul class="list-group">
             @foreach (var s in sitemaps)
             {

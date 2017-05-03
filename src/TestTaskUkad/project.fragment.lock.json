@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "exports": {
+    "SiteMapGen/1.0.0": {
+      "type": "project",
+      "framework": ".NETFramework,Version=v4.5.1",
+      "compile": {
+        "bin/Debug/SiteMapGen.dll": {}
+      },
+      "runtime": {
+        "../packages/HtmlAgilityPack.1.4.9.5/lib/Net45/HtmlAgilityPack.dll": {},
+        "bin/Debug/SiteMapGen.dll": {}
+      },
+      "contentFiles": {
+        "bin/Debug/SiteMapGen.pdb": {
+          "buildAction": "None",
+          "codeLanguage": "any",
+          "copyToOutput": true
+        }
+      }
+    }
+  }
+}

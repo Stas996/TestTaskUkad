@@ -1,6 +1,6 @@
 ﻿var app;
 (function () {
-    app = angular.module("SiteMapModule", []);
+    app = angular.module("SiteMapModule", ['ui.bootstrap', 'ng-fusioncharts']);
     app.config(['$locationProvider', function ($locationProvider) {
         $locationProvider.html5Mode({
             enabled: true,

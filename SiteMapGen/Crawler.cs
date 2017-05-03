@@ -5,16 +5,29 @@ using System.Net.Http;
 using System.Linq;
 using HtmlAgilityPack;
 
-namespace TestTaskUkad.Models
+namespace SiteMapGen
 {
+    /// <summary>
+    /// Html parser, that get all urls from document
+    /// </summary>
     public static class Crawler
     {
-        
+
+        /// <summary>
+        /// Gets the urls from HTML.
+        /// </summary>
+        /// <param name="url">The URL of site.</param>
+        /// <returns></returns>
         public static IEnumerable<Uri> GetUrlsFromHtml(string url)
         {
             return GetUrlsFromHtml(new Uri(url));
         }
 
+        /// <summary>
+        /// Gets the urls from HTML.
+        /// </summary>
+        /// <param name="url">The URL of site.</param>
+        /// <returns></returns>
         public static IEnumerable<Uri> GetUrlsFromHtml(Uri url)
         {
             var client = new HttpClient();
